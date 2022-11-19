@@ -27,6 +27,7 @@ func main() {
 	}
 }
 
+// stolen from https://golangdocs.com/golang-download-files
 func downloadFeed(feedUrl string) string {
 
 	// Build fileName from fullPath
@@ -65,6 +66,7 @@ func downloadFeed(feedUrl string) string {
 	return fileName
 }
 
+// stolen from https://gosamples.dev/unzip-file/
 func unzipSource(source, destination string) error {
 	// Open the zip file
 	fmt.Printf("Unzipping %s...\n", source)
@@ -91,6 +93,7 @@ func unzipSource(source, destination string) error {
 	return nil
 }
 
+// stolen from https://gosamples.dev/unzip-file/
 func unzipFile(f *zip.File, destination string) error {
 	fmt.Printf("  %s\n", f.Name)
 	// Check if file paths are not vulnerable to Zip Slip
