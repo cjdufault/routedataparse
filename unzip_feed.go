@@ -4,67 +4,10 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
-	"log"
-	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 )
-
-func main() {
-
-	//routeDataDestination := os.Args[1]
-
-	// Download feed file from Metro Transit's GTFS service
-	feedUrl := "https://svc.metrotransit.org/mtgtfs/gtfs.zip"
-	feedFile := downloadFeed(feedUrl)
-
-	// Unzip the file
-	err := unzipSource(feedFile, ".")
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-// stolen from https://golangdocs.com/golang-download-files
-func downloadFeed(feedUrl string) string {
-
-	// Build fileName from fullPath
-	fileURL, err := url.Parse(feedUrl)
-	if err != nil {
-		log.Fatal(err)
-	}
-	path := fileURL.Path
-	segments := strings.Split(path, "/")
-	fileName := segments[len(segments)-1]
-
-	// Create blank file
-	file, err := os.Create(fileName)
-	if err != nil {
-		log.Fatal(err)
-	}
-	client := http.Client{
-		CheckRedirect: func(r *http.Request, via []*http.Request) error {
-			r.URL.Opaque = r.URL.Path
-			return nil
-		},
-	}
-	// Put content on file
-	fmt.Printf("Downloading %s...\n", fileName)
-	resp, err := client.Get(feedUrl)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-
-	size, err := io.Copy(file, resp.Body)
-
-	defer file.Close()
-
-	fmt.Printf("  Downloaded %s - Filesize: %d\n", fileName, size)
-	return fileName
-}
 
 // stolen from https://gosamples.dev/unzip-file/
 func unzipSource(source, destination string) error {
