@@ -10,7 +10,7 @@ import (
 )
 
 // stolen from https://gosamples.dev/unzip-file/
-func unzipSource(source, destination string) error {
+func unzipSource(source, destination string, desiredFiles []string) error {
 	// Open the zip file
 	fmt.Printf("Unzipping %s...\n", source)
 	reader, err := zip.OpenReader(source)
@@ -27,9 +27,11 @@ func unzipSource(source, destination string) error {
 
 	// Iterate over zip files inside the archive and unzip each of them
 	for _, f := range reader.File {
-		err := unzipFile(f, destination)
-		if err != nil {
-			return err
+		if arrayContains(desiredFiles, f.Name) || len(desiredFiles) <= 0 {
+			err := unzipFile(f, destination)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -75,4 +77,13 @@ func unzipFile(f *zip.File, destination string) error {
 		return err
 	}
 	return nil
+}
+
+func arrayContains(array []string, str string) bool {
+	for _, i := range array {
+		if i == str {
+			return true
+		}
+	}
+	return false
 }
