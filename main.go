@@ -24,5 +24,5 @@ func main() {
 	}
 
 	shapes := getRouteShapes(routesFileName, tripsFileName, shapesFileName)
-	fmt.Print(shapes)
+	fmt.Print(shapes[0])
 }

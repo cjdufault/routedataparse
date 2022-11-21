@@ -38,22 +38,22 @@ func getRouteShapes(routesFileName string, tripsFileName string, shapesFileName 
 	shapes := []Shape{}
 	for _, route := range routes {
 		shapeId := From(trips).Where(func(trip interface{}) bool {
-			return trip.(Trip).RouteId == route.Id
+			return trip.(*Trip).RouteId == route.Id
 		}).Select(func(trip interface{}) interface{} {
-			return trip.(Trip).ShapeId
-		}).First().(Trip).ShapeId
+			return trip.(*Trip).ShapeId
+		}).First().(int)
 
 		shapePointArray := []ShapePoint{}
 		From(shapePoints).Where(func(shapePoint interface{}) bool {
-			return shapePoint.(ShapePoint).Id == shapeId
+			return shapePoint.(*ShapePoint).Id == shapeId
 		}).OrderBy(func(shapePoint interface{}) interface{} {
-			return shapePoint.(ShapePoint).Sequence
+			return shapePoint.(*ShapePoint).Sequence
 		}).Select(func(shapePoint interface{}) interface{} {
 			var point ShapePoint
-			point.Id = shapePoint.(ShapePoint).Id
-			point.Sequence = shapePoint.(ShapePoint).Sequence
-			point.Lat = shapePoint.(ShapePoint).Lat
-			point.Lon = shapePoint.(ShapePoint).Lon
+			point.Id = shapePoint.(*ShapePoint).Id
+			point.Sequence = shapePoint.(*ShapePoint).Sequence
+			point.Lat = shapePoint.(*ShapePoint).Lat
+			point.Lon = shapePoint.(*ShapePoint).Lon
 			return point
 		}).ToSlice(&shapePointArray)
 
