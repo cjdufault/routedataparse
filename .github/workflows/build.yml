@@ -32,6 +32,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
+          commit: main
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           artifacts: "routedataparse"
 
