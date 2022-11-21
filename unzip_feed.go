@@ -9,7 +9,8 @@ import (
 	"strings"
 )
 
-// stolen from https://gosamples.dev/unzip-file/
+// Unzip zip file "source" to destination.
+// Stolen from https://gosamples.dev/unzip-file/
 func unzipSource(source, destination string, desiredFiles []string) error {
 	// Open the zip file
 	fmt.Printf("Unzipping %s...\n", source)

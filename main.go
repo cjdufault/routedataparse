@@ -1,13 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"log"
 )
 
 func main() {
 
 	//routeDataDestination := os.Args[1]
-	neededFilenames := []string{"trips.txt", "stops.txt", "stop_times.txt"}
+	routesFileName := "routes.txt"
+	tripsFileName := "trips.txt"
+	shapesFileName := "shapes.txt"
+	neededFilenames := []string{routesFileName, tripsFileName, shapesFileName}
 
 	// Download feed file from Metro Transit's GTFS service
 	feedUrl := "https://svc.metrotransit.org/mtgtfs/gtfs.zip"
@@ -18,4 +22,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	shapes := getRouteShapes(routesFileName, tripsFileName, shapesFileName)
+	fmt.Print(shapes)
 }

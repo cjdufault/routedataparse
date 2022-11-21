@@ -10,7 +10,8 @@ import (
 	"strings"
 )
 
-// stolen from https://golangdocs.com/golang-download-files
+// Downloads the GTFS feed file from url "feedUrl" and saves it to pwd.
+// Stolen from https://golangdocs.com/golang-download-files
 func downloadFeed(feedUrl string) string {
 
 	// Build fileName from fullPath
