@@ -1,28 +1,41 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	"os"
 )
 
 func main() {
 
-	//routeDataDestination := os.Args[1]
+	// handle args, and set defaults (for now)
+	var feedUrl string
+	var routeDataDestination string
+
+	if len(os.Args) >= 2 {
+		feedUrl = os.Args[1]
+	} else {
+		feedUrl = "https://svc.metrotransit.org/mtgtfs/gtfs.zip"
+	}
+	if len(os.Args) >= 3 {
+		routeDataDestination = os.Args[2]
+	} else {
+		routeDataDestination = "./shapes"
+	}
+
 	routesFileName := "routes.txt"
 	tripsFileName := "trips.txt"
 	shapesFileName := "shapes.txt"
 	neededFilenames := []string{routesFileName, tripsFileName, shapesFileName}
 
 	// Download feed file from Metro Transit's GTFS service
-	feedUrl := "https://svc.metrotransit.org/mtgtfs/gtfs.zip"
 	feedFile := downloadFeed(feedUrl)
 
 	// Unzip the file
-	err := unzipSource(feedFile, ".", neededFilenames)
-	if err != nil {
-		log.Fatal(err)
+	if err := unzipSource(feedFile, ".", neededFilenames); err != nil {
+		panic(err)
 	}
 
+	// Parse data and output an array of Shape, one per route
 	shapes := getRouteShapes(routesFileName, tripsFileName, shapesFileName)
-	fmt.Print(shapes[0])
+
+	exportShapesToJson(shapes, routeDataDestination)
 }
