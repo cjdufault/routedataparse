@@ -30,24 +30,31 @@ type Shape struct {
 	Points      []ShapePoint
 }
 
+// Reads data from routes.txt, trips.txt, and shapes.txt.
+// Parses data into an array of Shape, with one shape per route.
+// It's possible that this doesn't correctly handle variations in routes across trips.
 func getRouteShapes(routesFileName string, tripsFileName string, shapesFileName string) []Shape {
 	routes := getRoutes(routesFileName)
 	trips := getTrips(tripsFileName)
 	shapePoints := getShapePoints(shapesFileName)
 
 	shapes := []Shape{}
-	for _, route := range routes {
+	for _, route := range routes { // iterate through all routes
+
+		// from first trip with matching RouteId, get the ShapeId
+		// this is where we may get bitten by variations in routes across trips
 		shapeId := From(trips).Where(func(trip interface{}) bool {
 			return trip.(*Trip).RouteId == route.Id
 		}).Select(func(trip interface{}) interface{} {
 			return trip.(*Trip).ShapeId
 		}).First().(int)
 
+		// build array of ShapePoint where Id matches the ShapeId we got above
 		shapePointArray := []ShapePoint{}
 		From(shapePoints).Where(func(shapePoint interface{}) bool {
-			return shapePoint.(*ShapePoint).Id == shapeId
+			return shapePoint.(*ShapePoint).Id == shapeId // match by ShapeId
 		}).OrderBy(func(shapePoint interface{}) interface{} {
-			return shapePoint.(*ShapePoint).Sequence
+			return shapePoint.(*ShapePoint).Sequence // sort by Sequence
 		}).Select(func(shapePoint interface{}) interface{} {
 			var point ShapePoint
 			point.Id = shapePoint.(*ShapePoint).Id
@@ -57,6 +64,7 @@ func getRouteShapes(routesFileName string, tripsFileName string, shapesFileName 
 			return point
 		}).ToSlice(&shapePointArray)
 
+		// assign the values we've retrieved to a Shape, and append to the Shape array
 		var shape Shape
 		shape.Id = shapeId
 		shape.RouteId = route.Id
@@ -64,10 +72,10 @@ func getRouteShapes(routesFileName string, tripsFileName string, shapesFileName 
 
 		shapes = append(shapes, shape)
 	}
-
 	return shapes
 }
 
+// Reads route data in from routes.txt
 func getRoutes(fileName string) []*Route {
 	file := openFile(fileName)
 
@@ -80,6 +88,7 @@ func getRoutes(fileName string) []*Route {
 	return routes
 }
 
+// Reads trip data in from trips.txt
 func getTrips(fileName string) []*Trip {
 	file := openFile(fileName)
 
@@ -92,6 +101,7 @@ func getTrips(fileName string) []*Trip {
 	return trips
 }
 
+// Reads shape data in from shapes.txt
 func getShapePoints(fileName string) []*ShapePoint {
 	file := openFile(fileName)
 
@@ -110,8 +120,4 @@ func openFile(fileName string) *os.File {
 		panic(err)
 	}
 	return file
-}
-
-func unmarshal(file *os.File, out interface{}) {
-
 }
