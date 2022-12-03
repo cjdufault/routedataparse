@@ -28,7 +28,7 @@ func exportShapesToJson(shapes []Shape, destination string) {
 			panic(err)
 		}
 
-		filePath := filepath.Join(destination, fmt.Sprintf("%d.json", shape.RouteId))
+		filePath := filepath.Join(destination, fmt.Sprintf("%d_%s.json", shape.RouteId, shape.Direction))
 		writeToFile(shapeJson, filePath)
 	}
 }
