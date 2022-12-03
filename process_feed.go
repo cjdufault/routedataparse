@@ -13,10 +13,10 @@ type Route struct {
 }
 
 type Trip struct {
-	Id            string `csv:"trip_id"`
-	RouteId       int    `csv:"route_id"`
-	DirectionName string `csv:"direction"`
-	ShapeId       int    `csv:"shape_id"`
+	Id        string `csv:"trip_id"`
+	RouteId   int    `csv:"route_id"`
+	Direction string `csv:"direction"`
+	ShapeId   int    `csv:"shape_id"`
 }
 
 type ShapePoint struct {
@@ -47,7 +47,7 @@ func getRouteShapes(routesFileName string, tripsFileName string, shapesFileName 
 		From(trips).Where(func(trip interface{}) bool {
 			return trip.(*Trip).RouteId == route.Id
 		}).Select(func(trip interface{}) interface{} {
-			return trip.(*Trip).DirectionName
+			return trip.(*Trip).Direction
 		}).Distinct().ToSlice(&directions)
 
 		for _, direction := range directions {
@@ -56,7 +56,7 @@ func getRouteShapes(routesFileName string, tripsFileName string, shapesFileName 
 			shapeId := From(trips).Where(func(trip interface{}) bool {
 				return trip.(*Trip).RouteId == route.Id
 			}).Where(func(trip interface{}) bool {
-				return trip.(*Trip).DirectionName == direction
+				return trip.(*Trip).Direction == direction
 			}).Select(func(trip interface{}) interface{} {
 				return trip.(*Trip).ShapeId
 			}).First().(int)
