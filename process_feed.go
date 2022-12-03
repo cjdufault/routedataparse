@@ -13,9 +13,10 @@ type Route struct {
 }
 
 type Trip struct {
-	Id      string `csv:"trip_id"`
-	RouteId int    `csv:"route_id"`
-	ShapeId int    `csv:"shape_id"`
+	Id            string `csv:"trip_id"`
+	RouteId       int    `csv:"route_id"`
+	DirectionName string `csv:"direction"`
+	ShapeId       int    `csv:"shape_id"`
 }
 
 type ShapePoint struct {
@@ -27,6 +28,7 @@ type ShapePoint struct {
 
 type Shape struct {
 	Id, RouteId int
+	Direction   string
 	Points      []ShapePoint
 }
 
@@ -41,36 +43,48 @@ func getRouteShapes(routesFileName string, tripsFileName string, shapesFileName 
 	shapes := []Shape{}
 	for _, route := range routes { // iterate through all routes
 
-		// from first trip with matching RouteId, get the ShapeId
-		// this is where we may get bitten by variations in routes across trips
-		shapeId := From(trips).Where(func(trip interface{}) bool {
+		directions := []string{}
+		From(trips).Where(func(trip interface{}) bool {
 			return trip.(*Trip).RouteId == route.Id
 		}).Select(func(trip interface{}) interface{} {
-			return trip.(*Trip).ShapeId
-		}).First().(int)
+			return trip.(*Trip).DirectionName
+		}).Distinct().ToSlice(&directions)
 
-		// build array of ShapePoint where Id matches the ShapeId we got above
-		shapePointArray := []ShapePoint{}
-		From(shapePoints).Where(func(shapePoint interface{}) bool {
-			return shapePoint.(*ShapePoint).Id == shapeId // match by ShapeId
-		}).OrderBy(func(shapePoint interface{}) interface{} {
-			return shapePoint.(*ShapePoint).Sequence // sort by Sequence
-		}).Select(func(shapePoint interface{}) interface{} {
-			var point ShapePoint
-			point.Id = shapePoint.(*ShapePoint).Id
-			point.Sequence = shapePoint.(*ShapePoint).Sequence
-			point.Lat = shapePoint.(*ShapePoint).Lat
-			point.Lon = shapePoint.(*ShapePoint).Lon
-			return point
-		}).ToSlice(&shapePointArray)
+		for _, direction := range directions {
+			// from first trip with matching RouteId and matching direction, get ShapeId
+			// this is where we may get bitten by variations in routes across trips
+			shapeId := From(trips).Where(func(trip interface{}) bool {
+				return trip.(*Trip).RouteId == route.Id
+			}).Where(func(trip interface{}) bool {
+				return trip.(*Trip).DirectionName == direction
+			}).Select(func(trip interface{}) interface{} {
+				return trip.(*Trip).ShapeId
+			}).First().(int)
 
-		// assign the values we've retrieved to a Shape, and append to the Shape array
-		var shape Shape
-		shape.Id = shapeId
-		shape.RouteId = route.Id
-		shape.Points = shapePointArray
+			// build array of ShapePoint where Id matches the ShapeId we got above
+			shapePointArray := []ShapePoint{}
+			From(shapePoints).Where(func(shapePoint interface{}) bool {
+				return shapePoint.(*ShapePoint).Id == shapeId // match by ShapeId
+			}).OrderBy(func(shapePoint interface{}) interface{} {
+				return shapePoint.(*ShapePoint).Sequence // sort by Sequence
+			}).Select(func(shapePoint interface{}) interface{} {
+				var point ShapePoint
+				point.Id = shapePoint.(*ShapePoint).Id
+				point.Sequence = shapePoint.(*ShapePoint).Sequence
+				point.Lat = shapePoint.(*ShapePoint).Lat
+				point.Lon = shapePoint.(*ShapePoint).Lon
+				return point
+			}).ToSlice(&shapePointArray)
 
-		shapes = append(shapes, shape)
+			// assign the values we've retrieved to a Shape, and append to the Shape array
+			var shape Shape
+			shape.Id = shapeId
+			shape.RouteId = route.Id
+			shape.Direction = direction
+			shape.Points = shapePointArray
+
+			shapes = append(shapes, shape)
+		}
 	}
 	return shapes
 }
