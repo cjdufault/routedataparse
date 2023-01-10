@@ -33,6 +33,28 @@ func exportShapesToJson(shapes []Shape, destination string) {
 	}
 }
 
+func exportStopsToJson(stops []Stop, destination string) {
+
+	fmt.Printf("Writing stop data to %s...\n", destination)
+
+	destination, err := filepath.Abs(destination)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := os.MkdirAll(destination, os.ModePerm); err != nil {
+		panic(err)
+	}
+
+	stopsJson, err := json.Marshal(stops)
+	if err != nil {
+		panic(err)
+	}
+
+	filePath := filepath.Join(destination, "stops.json")
+	writeToFile(stopsJson, filePath)
+}
+
 func writeToFile(contents []byte, path string) {
 	fmt.Printf("  %s\n", path)
 	if err := os.WriteFile(path, contents, 0666); err != nil {

@@ -32,6 +32,13 @@ type Shape struct {
 	Points      []ShapePoint
 }
 
+type Stop struct {
+	Id   int     `csv:"stop_id"`
+	Name string  `csv:"stop_name"`
+	Lat  float64 `csv:"stop_lat"`
+	Long float64 `csv:"stop_lon"`
+}
+
 // Reads data from routes.txt, trips.txt, and shapes.txt.
 // Parses data into an array of Shape, with one shape per route.
 // It's possible that this doesn't correctly handle variations in routes across trips.
@@ -126,6 +133,18 @@ func getShapePoints(fileName string) []*ShapePoint {
 
 	defer file.Close()
 	return shapePoints
+}
+
+func getStops(stopsFileName string) []Stop {
+	file := openFile(stopsFileName)
+
+	stops := []Stop{}
+	if err := gocsv.UnmarshalFile(file, &stops); err != nil {
+		panic(err)
+	}
+
+	defer file.Close()
+	return stops
 }
 
 func openFile(fileName string) *os.File {

@@ -9,6 +9,7 @@ func main() {
 	// handle args, and set defaults (for now)
 	var feedUrl string
 	var routeDataDestination string
+	var stopDataDestination string
 
 	if len(os.Args) >= 2 {
 		feedUrl = os.Args[1]
@@ -20,11 +21,17 @@ func main() {
 	} else {
 		routeDataDestination = "./shapes"
 	}
+	if len(os.Args) >= 4 {
+		stopDataDestination = os.Args[3]
+	} else {
+		stopDataDestination = "./stops"
+	}
 
 	routesFileName := "routes.txt"
 	tripsFileName := "trips.txt"
 	shapesFileName := "shapes.txt"
-	neededFilenames := []string{routesFileName, tripsFileName, shapesFileName}
+	stopsFileName := "stops.txt"
+	neededFilenames := []string{routesFileName, tripsFileName, shapesFileName, stopsFileName}
 
 	// Download feed file from Metro Transit's GTFS service
 	feedFile := downloadFeed(feedUrl)
@@ -34,8 +41,11 @@ func main() {
 		panic(err)
 	}
 
-	// Parse data and output an array of Shape, one per route
+	// Parse route data and output an array of Shape, one per route
 	shapes := getRouteShapes(routesFileName, tripsFileName, shapesFileName)
-
 	exportShapesToJson(shapes, routeDataDestination)
+
+	// Parse stops data and output a json document of Stops
+	stops := getStops(stopsFileName)
+	exportStopsToJson(stops, stopDataDestination)
 }
